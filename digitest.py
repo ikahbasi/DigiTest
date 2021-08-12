@@ -202,7 +202,7 @@ def _get_time_error(tr, mean=None, show=False):
 
 ###############################################################################
 def _RMS(array):
-    rms = np.sqrt(np.mean(np.square(array.astype('int64'))))
+    rms = np.sqrt(np.mean(np.square(array.astype('float64'))))
     return rms
 
 
@@ -429,10 +429,13 @@ class CheckDigitizer:
             tr = st[0]
             name = f'{tr.id}-{int(inp.sampling_rate)}sps\nInput frequency is {freq_input}'
             tr.data = tr.data / inp.gain
-            tr.plot(outfile=f'./{savedir}/{freq_input}HZ-{inp.vpp}vpp-{tr.id}-trace.png')
+            tr.detrend('constant')
+            _id = tr.id
+            tr.stats.channel = tr.stats.channel + f'({inp.vpp} vpp)'
+            tr.plot(outfile=f'./{savedir}/{indx}_{freq_input}HZ-{inp.vpp}vpp-{_id}-trace.png')
             tr.plot(starttime=tr.stats.starttime,
                     endtime=tr.stats.starttime + (1/freq_input*5),
-                    outfile=f'./{savedir}/{freq_input}HZ-{inp.vpp}vpp-{tr.id}-trace-5T.png')
+                    outfile=f'./{savedir}/{indx}_{freq_input}HZ-{inp.vpp}vpp-{tr.id}-trace-5T.png')
             tr.taper(0.05)
             data = tr.data
             delta = tr.stats.delta
@@ -586,7 +589,7 @@ class CheckDigitizer:
             dynamicrange_n_detrend = 20 * np.log10(amp_max/rms_n_detrend)
             dynamicrange_n_detrend = round(dynamicrange_n_detrend, 2)
             tr.detrend('constant')
-            tr.plot()
+            tr.plot(outfile=f'{tr.id}-selfnoise.png')
             rms_y_detrend = _RMS(tr.data)
             rms_y_detrend = round(rms_y_detrend, 2)
             dynamicrange_y_detrend = 20 * np.log10((amp_max-mean)/rms_y_detrend)
@@ -688,7 +691,7 @@ class CheckDigitizer:
                 stime = part.starttime.strftime('%H:%M:%S')
                 etime = part.endtime.strftime('%H:%M:%S')
                 fig = plt.figure(figsize=(8, 6))
-                plt.hist(bins[:-1], bins, weights=counts)
+                plt.hist(bins[:-1], bins, weights=counts,edgecolor='black', linewidth=1.2)
                 plt.title(f'Device: {key}\n' +
                           f'{date} ({stime} to {etime})', fontweight='black')
                 plt.xticks(rotation=30)
