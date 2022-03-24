@@ -288,7 +288,7 @@ class result:
         self.id = _id
         self.details = []
         self.ppsd = freq_amp(_id, TYPE='')
-        self.freqresp_singelfreq = freq_amp(_id, TYPE='Singel frequency')
+        self.freqresp_singlefreq = freq_amp(_id, TYPE='single frequency')
         self.freqresp_whitenoise = freq_amp(_id, TYPE='White noise')
         self.gain = None
         self.psd = freq_amp_psd(_id)
@@ -341,7 +341,7 @@ class CheckDigitizer:
             self.results[key].psd.amplitude = psd
             
     ###########################################################################
-    def plot_psd(self, method='singel', **kwargs):
+    def plot_psd(self, method='single', **kwargs):
         if method == 'group':
             fig, ax = plt.subplots(figsize=(8, 5))
             for key, result in self.results.items():
@@ -354,7 +354,7 @@ class CheckDigitizer:
             plt.legend()
             plt.grid()
             _finalise_figure(fig, **kwargs)
-        if method == 'singel':
+        if method == 'single':
             for key, result in self.results.items():
                 fig, ax = plt.subplots(figsize=(8, 5))
                 freq   = result.psd.frequency
@@ -368,7 +368,7 @@ class CheckDigitizer:
                 _finalise_figure(fig, **kwargs)
     
     ###########################################################################
-    def freqresp_singelfreq(self, stream=None):
+    def freqresp_singlefreq(self, stream=None):
         if stream is not None:
             PreProcessStream(stream)
         for indx, inp in self.inputs.iterrows():
@@ -395,11 +395,11 @@ class CheckDigitizer:
             key = f'{tr.id}-{int(inp.sampling_rate)}sps'
             if key not in self.results.keys():
                 self.results[key] = result(key)
-            self.results[key].freqresp_singelfreq.frequency.append(freq)
-            self.results[key].freqresp_singelfreq.amplitude.append(ampl)
+            self.results[key].freqresp_singlefreq.frequency.append(freq)
+            self.results[key].freqresp_singlefreq.amplitude.append(ampl)
 
     ###########################################################################
-    def freqresp_singelfreq_fft_plot(self, stream=None, savedir='fft-of-singleferq', **kwargs):
+    def freqresp_singlefreq_fft_plot(self, stream=None, savedir='fft-of-singleferq', **kwargs):
         # for all frequency
         if kwargs.get('save', False):                                          # Added 1400-03-09
             os.makedirs(savedir, exist_ok=True)                                # Added 1400-03-09
@@ -452,7 +452,7 @@ class CheckDigitizer:
             ampl = np.abs(ampl[:npts//2]) / (segment*delta) # time of data = segment * delta
             print('max: ',max(ampl))
             ampl = 20 * np.log10(ampl)                                           # mutiple 10 convert to 20 (1400-03-09)
-            # for a singel frequency figure
+            # for a single frequency figure
             
             fig2 = plt.figure()
             ax2 = plt.gca()
@@ -466,7 +466,7 @@ class CheckDigitizer:
             savefile = f'./{savedir}/{tr.id}_{freq_input}HZ-{inp.vpp}vpp.png'
             _finalise_figure(fig2, savefile=savefile, **kwargs)
             
-            # for all singel frequency figure
+            # for all single frequency figure
             ax1.semilogx(freq, ampl, label=f'{freq_input}HZ-{inp.vpp}vpp')
         ax1.set_title('Recorded frequency')
         ax1.set_xlabel('Frequency [HZ]')
@@ -506,12 +506,12 @@ class CheckDigitizer:
             self.results[key].freqresp_whitenoise.amplitude = ampl
 
     ###########################################################################
-    def plot_compare_freqresp(self, method='singelfreq', **kwargs):
-        if method=='singelfreq':
+    def plot_compare_freqresp(self, method='singlefreq', **kwargs):
+        if method=='singlefreq':
             fig, ax = plt.subplots(figsize=(8, 5))
             for key, result in self.results.items():
-                freq = result.freqresp_singelfreq.frequency
-                ampl = result.freqresp_singelfreq.amplitude
+                freq = result.freqresp_singlefreq.frequency
+                ampl = result.freqresp_singlefreq.amplitude
                 plt.semilogx(freq, ampl, label=key)
             plt.legend()
             plt.title('Frequency Response', fontweight='black')
@@ -532,7 +532,7 @@ class CheckDigitizer:
             plt.ylabel('Amplitude [V dB]', fontweight='black')
             plt.grid()
             _finalise_figure(fig, **kwargs)
-        if method=='singelfreq VS whitenoise':
+        if method=='singlefreq VS whitenoise':
             for key, result in self.results.items():
                 fig, ax = plt.subplots(figsize=(8, 5))
                 #
@@ -541,10 +541,10 @@ class CheckDigitizer:
                 #norm_whitenoise = ampl_whitenoise[find_near_value_index(array=freq_whitenoise, value=80)]
                 #ampl_whitenoise = ampl_whitenoise / norm_whitenoise
                 #
-                freq_singelfreq = result.freqresp_singelfreq.frequency
-                ampl_singelfreq = result.freqresp_singelfreq.amplitude
-                #norm_singelfreq = ampl_singelfreq[find_near_value_index(array=freq_singelfreq, value=80)]
-                #ampl_singelfreq = ampl_singelfreq / norm_singelfreq
+                freq_singlefreq = result.freqresp_singlefreq.frequency
+                ampl_singlefreq = result.freqresp_singlefreq.amplitude
+                #norm_singlefreq = ampl_singlefreq[find_near_value_index(array=freq_singlefreq, value=80)]
+                #ampl_singlefreq = ampl_singlefreq / norm_singlefreq
                 #
                 #max_passband_ampl_whitenoise = max(
                 #        ampl_whitenoise[len(ampl_whitenoise)//2:])
@@ -552,10 +552,10 @@ class CheckDigitizer:
                 plt.semilogx(freq_whitenoise, ampl_whitenoise,
                              label=key+' white-noise')
                 #
-                #ampl_singelfreq = np.array(ampl_singelfreq) / max(ampl_singelfreq)
-                plt.semilogx(freq_singelfreq, ampl_singelfreq,
-                             label=key+' singel-freq')
-                title = 'Frequency Response\nWhite noise VS Singel freqency'
+                #ampl_singlefreq = np.array(ampl_singlefreq) / max(ampl_singlefreq)
+                plt.semilogx(freq_singlefreq, ampl_singlefreq,
+                             label=key+' single-freq')
+                title = 'Frequency Response\nWhite noise VS single freqency'
                 plt.title(title, fontweight='black')
                 plt.xlabel('Frequency [Hz]', fontweight='black')
                 plt.ylabel('Amplitude [V db]', fontweight='black')
